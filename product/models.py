@@ -37,7 +37,7 @@ class Question(models.Model):
     title       = models.CharField(max_length=45)
     content     = models.TextField(max_length=4000)
     image_url   = models.URLField(max_length=2000, null=True)
-    secret      = models.PositiveIntegerField(default=0)
+    secret      = models.BooleanField(default=False)
     secret_code = models.CharField(max_length=45, null=True)
     pub_date    = models.DateTimeField(auto_now_add=True)
 

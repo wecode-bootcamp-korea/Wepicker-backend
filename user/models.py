@@ -24,8 +24,8 @@ class Card(models.Model):
     user          = models.ForeignKey('User', on_delete=models.CASCADE)
     company       = models.CharField(max_length=45)
     number        = models.CharField(max_length=45)
-    expired_year  = models.CharField(max_length=45)
-    expired_month = models.CharField(max_length=45)
+    expired_year  = models.CharField(max_length=45, default='')
+    expired_month = models.CharField(max_length=45, default='')
 
     class Meta:
         db_table = 'cards'
@@ -34,7 +34,7 @@ class Address(models.Model):
     user        = models.ForeignKey('User', on_delete=models.CASCADE) 
     address     = models.CharField(max_length=400)
     post_number = models.CharField(max_length=45)
-    default     = models.IntegerField(default=0)
+    default     = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'addresses'
