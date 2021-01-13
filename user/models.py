@@ -45,7 +45,7 @@ class Wish_list(models.Model):
     class Meta:
         db_table = 'wish_lists'
 
-class Personal_questions(models.Model):
+class Personal_question(models.Model):
     user      = models.ForeignKey('User', on_delete=models.CASCADE)
     title     = models.CharField(max_length=45)
     content   = models.TextField(max_length=3000)
