@@ -17,7 +17,7 @@ class Point(models.Model):
     point        = models.CharField(max_length=45)
     payment_date = models.DateTimeField(auto_now_add=True)
 
-    class Mete:
+    class Meta:
         db_table = 'points'
 
 class Card(models.Model):
@@ -26,7 +26,7 @@ class Card(models.Model):
     number      = models.CharField(max_length=45)
     expire_date = models.DateTimeField(auto_now_add=True)
 
-    class Mets:
+    class Meta:
         db_table = 'cards'
 
 class Address(models.Model):
@@ -35,7 +35,7 @@ class Address(models.Model):
     post_number = models.CharField(max_length=45)
     default     = models.IntegerField(default=0)
 
-    class Mete:
+    class Meta:
         db_table = 'addresses'
 
 class Wish_list(models.Model):
