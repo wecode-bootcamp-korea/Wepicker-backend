@@ -5,7 +5,7 @@ class OrderItem(models.Model):
     product       = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
     order         = models.ForeignKey('Order', on_delete=models.CASCADE)
     quantity      = models.PositiveIntegerField(default=0)
-    price         = models.CharField(max_length=45)
+    price         = models.DecimalField(max_digits=18, decimal_places=2)
     option        = models.ForeignKey('product.Option', on_delete=models.SET_NULL, null=True)
     delivery_cost = models.ForeignKey('DeliveryCost', on_delete=models.SET_NULL, null=True)
     
@@ -15,22 +15,22 @@ class OrderItem(models.Model):
 class Order(models.Model):
     user           = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True) 
     address        = models.ForeignKey('user.Address', on_delete=models.SET_NULL, null=True)
-    point          = models.CharField(max_length=45)
+    point          = models.IntegerField()
     card           = models.ForeignKey('user.Card', on_delete=models.SET_NULL, null=True)
     state          = models.ForeignKey('OrderState', on_delete=models.SET_NULL, null=True)
+    memo           = models.CharField(max_length=200, null=True) 
+    order_date     = models.DateTimeField(auto_now_add=True)
+    payment_method = models.CharField(max_length=45)
+    payment_type   = models.ForeignKey('PaymentType', on_delete=models.SET_NULL, null=True)
 
     class Meta:
         db_table = 'orders'
 
-class OrderInfo(models.Model):
-    order          = models.ForeignKey('Order', on_delete=models.CASCADE)
-    memo           = models.CharField(max_length=200, null=True) 
-    order_date     = models.DateTimeField(auto_now_add=True)
-    payment_method = models.CharField(max_length=45)
+class PaymentType(models.Model):
     payment_type   = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'order_infos'
+        db_table = 'payment_types'
 
 class OrderState(models.Model):
     state = models.CharField(max_length=45)
