@@ -1,12 +1,12 @@
 from django.db import models
 
 class User(models.Model):
-    userId         = models.CharField(max_length=50)
+    account        = models.CharField(max_length=50)
     password       = models.CharField(max_length=1000)
     name           = models.CharField(max_length=50)
     phone          = models.CharField(max_length=50)
     email          = models.EmailField(max_length=120, null=True)
-    profile_photo  = models.CharField(max_length=1000, null=True)
+    profile_photo  = models.URLField(max_length=2000, null=True)
 
     class Meta:
         db_table = 'users'
@@ -14,17 +14,18 @@ class User(models.Model):
 class Point(models.Model):
     user         = models.ForeignKey('User', on_delete=models.CASCADE)
     content      = models.CharField(max_length=80)
-    point        = models.CharField(max_length=45)
+    point        = models.IntegerField()
     payment_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'points'
 
 class Card(models.Model):
-    user        = models.ForeignKey('User', on_delete=models.CASCADE)
-    company     = models.CharField(max_length=45)
-    number      = models.CharField(max_length=45)
-    expire_date = models.DateTimeField(auto_now_add=True)
+    user          = models.ForeignKey('User', on_delete=models.CASCADE)
+    company       = models.CharField(max_length=45)
+    number        = models.CharField(max_length=45)
+    expired_year  = models.CharField(max_length=45)
+    expired_month = models.CharField(max_length=45)
 
     class Meta:
         db_table = 'cards'
@@ -38,21 +39,11 @@ class Address(models.Model):
     class Meta:
         db_table = 'addresses'
 
-class Wish_list(models.Model):
+class WishList(models.Model):
     user    = models.ForeignKey('User', on_delete=models.CASCADE) 
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'wish_lists'
 
-class Personal_question(models.Model):
-    user      = models.ForeignKey('User', on_delete=models.CASCADE)
-    title     = models.CharField(max_length=45)
-    content   = models.TextField(max_length=3000)
-    image_url = models.CharField(max_length=1000, null=True)
-    secret    = models.PositiveIntegerField(default=0)
-    pub_date  = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'personal_questions'
 
