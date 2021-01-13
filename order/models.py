@@ -13,7 +13,7 @@ class Order_item(models.Model):
         db_table = 'order_items'
 
 class Order(models.Model):
-    user           = models.ForeignKey('User', on_delete=models.SET_NULL, null=True) 
+    user           = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True) 
     address        = models.ForeignKey('user.Address', on_delete=models.SET_NULL, null=True)
     point          = models.CharField(max_length=45)
     card           = models.ForeignKey('user.Card', on_delete=models.SET_NULL, null=True)
