@@ -26,9 +26,9 @@ class SignUpView(View):
             regex           = re.compile(email_reg)
 
             if len(account) < 5 or len(name) < 1 or len(password) < 8 or len(phone) < 11 or not regex.match(data['email']):
-                return JsonResponse({'message':'형식 오류'}, status=400)
+                return JsonResponse({'message':'INVALID_FORMAT'}, status=400)
             if User.objects.filter(account=data['account']).exists() or User.objects.filter(email=data['email']).exists():
-                return JsonResponse({'message':'이미 존재하는 계정'}, status=400)
+                return JsonResponse({'message':'USER_ALREADY_EXIST'}, status=400)
 
             User(
                 account       = account,
@@ -45,6 +45,10 @@ class SignUpView(View):
                 point   = 1000
             ).save()
 
-            return JsonResponse({'message':'Success'}, status=201)
+            return JsonResponse({'message':'SUCCESS'}, status=201)
         except KeyError:
-            return JsonResponse({'message':'Key_Error'}, status=400)
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
+
+
+
+
