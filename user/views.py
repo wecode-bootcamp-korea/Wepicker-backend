@@ -1,13 +1,11 @@
+import re
 import jwt
 import json
 import bcrypt
 
-from django.shortcuts import render
 from django.views     import View
 from django.db        import transaction
 from django.http      import JsonResponse, HttpResponse
-
-from django.core.validators import MinLengthValidator
 
 from .models          import User, Point
 from decorator        import login_check
@@ -24,14 +22,13 @@ class SignUpView(View):
             account         = data['account']
             name            = data['name']
             phone           = data['phone']
-        
+            email_reg       = r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+            regex           = re.compile(email_reg)
 
-            if len(account) < 5 or len(name) < 1 or len(password) < 8 or len(phone) < 11:
-                return HttpResponse('형식 오류', status=400) 
+            if len(account) < 5 or len(name) < 1 or len(password) < 8 or len(phone) < 11 or not regex.match(data['email']):
+                return JsonResponse({'message':'형식 오류'}, status=400)
             if User.objects.filter(account=data['account']).exists() or User.objects.filter(email=data['email']).exists():
-                return HttpResponse('이미 가입된 계정', status=400)
-            if '@' and '.com' not in data['email']:
-                return HttpResponse('이메일 형식 오류', status=400)
+                return JsonResponse({'message':'이미 존재하는 계정'}, status=400)
 
             User(
                 account       = account,
@@ -48,6 +45,6 @@ class SignUpView(View):
                 point   = 1000
             ).save()
 
-            return HttpResponse('Success', status=201)
+            return JsonResponse({'message':'Success'}, status=201)
         except KeyError:
-            return HttpResponse('Key_Error', status=400)
+            return JsonResponse({'message':'Key_Error'}, status=400)
