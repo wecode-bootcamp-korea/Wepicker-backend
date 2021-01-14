@@ -49,6 +49,25 @@ class SignUpView(View):
         except KeyError:
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
+# 로그인
+class SignInView(View):
+    def post(self, request):
+        try:
+            data     = json.loads(request.body)
+            account  = data['account']
+            password = data['password']
 
+            if not User.objects.filter(account=account).exists():
+                return JsonResponse({'message':'USER_DOES_NOT_EXIST'}, status=400)
+            
+            user           = User.objects.get(account=account)
+            password_check = user.password
 
+            if bcrypt.checkpw(password.encode('utf-8'), password_check.encode('utf-8')):
+                token = jwt.encode({'id': user.id}, SECRET_KEY, algorithm='HS256')
+                return JsonResponse({'token':token}, status=200)
+            else:
+                return JsonResponse({'message':'INVALID_PASSWORD'}, status=401)
 
+        except KeyError:
+            return JsonResponse({'message':'KET_ERROR'}, status=400)
