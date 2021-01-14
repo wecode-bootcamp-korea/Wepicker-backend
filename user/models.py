@@ -1,11 +1,11 @@
-from django.db import models
+from django.db              import models
 
 class User(models.Model):
     account        = models.CharField(max_length=50)
     password       = models.CharField(max_length=1000)
     name           = models.CharField(max_length=50)
     phone          = models.CharField(max_length=50)
-    email          = models.EmailField(max_length=120, null=True)
+    email          = models.EmailField(max_length=120)
     profile_photo  = models.URLField(max_length=2000, null=True)
 
     class Meta:
