@@ -22,6 +22,7 @@ class SignUpView(View):
             account         = data['account']
             name            = data['name']
             phone           = data['phone']
+            profile_photo   = data.get('profile_photo')
             email_reg       = r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
             regex           = re.compile(email_reg)
 
@@ -29,6 +30,8 @@ class SignUpView(View):
                 return JsonResponse({'message':'INVALID_FORMAT'}, status=400)
             if User.objects.filter(account=data['account']).exists() or User.objects.filter(email=data['email']).exists():
                 return JsonResponse({'message':'USER_ALREADY_EXIST'}, status=400)
+            if len(profile_photo) == 0:
+                profile_photo = None
 
             User(
                 account       = account,
@@ -36,7 +39,7 @@ class SignUpView(View):
                 name          = name,
                 phone         = phone,
                 email         = data['email'],
-                profile_photo = data.get('profile_photo')
+                profile_photo = profile_photo
             ).save()
 
             Point(
@@ -55,16 +58,16 @@ class SignInView(View):
         try:
             data     = json.loads(request.body)
             account  = data['account']
-            password = data['password']
+            password = data['password'] 
 
             if not User.objects.filter(account=account).exists():
                 return JsonResponse({'message':'USER_DOES_NOT_EXIST'}, status=400)
-            
+
             user           = User.objects.get(account=account)
             password_check = user.password
 
             if bcrypt.checkpw(password.encode('utf-8'), password_check.encode('utf-8')):
-                token = jwt.encode({'id': user.id}, SECRET_KEY, algorithm='HS256')
+                token = jwt.encode({'id': user.id}, SECRET_KEY, algorithm='HS256').decode('utf-8')
                 return JsonResponse({'token':token}, status=200)
             else:
                 return JsonResponse({'message':'INVALID_PASSWORD'}, status=401)

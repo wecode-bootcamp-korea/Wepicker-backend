@@ -24,7 +24,7 @@ class Image(models.Model):
         db_table = 'images'
 
 class Option(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='option')
     name    = models.CharField(max_length=45)
     price   = models.DecimalField(max_digits=18, decimal_places=2, null=True)
 
