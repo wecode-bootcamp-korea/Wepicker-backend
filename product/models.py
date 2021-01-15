@@ -18,7 +18,7 @@ class Product(models.Model):
         db_table = 'products'
 
 class Image(models.Model):
-    product   = models.ForeignKey('Product', on_delete=models.CASCADE)
+    product   = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='image_url')
     image_url = models.URLField(max_length=2000)
     class Meta:
         db_table = 'images'
@@ -46,7 +46,7 @@ class Question(models.Model):
 
 class Review(models.Model):
     user      = models.ForeignKey('user.User', on_delete=models.CASCADE)
-    product   = models.ForeignKey('product.Product', on_delete=models.CASCADE)
+    product   = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name='review')
     content   = models.TextField(max_length=4000)
     image_url = models.URLField(max_length=2000, null=True)
     pub_date  = models.DateTimeField(auto_now_add=True)
