@@ -59,3 +59,6 @@ class ProductAllView(View):
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
         except Category.DoesNotExist:
             return JsonResponse({'message':'CATEGORY_DOES_NOT_EXIST'}, status=404)
+        except UnboundLocalError:
+            return JsonResponse({'message':'FILTER_DOES_NOT_EXIST'}, status=404)
+
