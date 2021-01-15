@@ -1,4 +1,5 @@
 import json
+import math
 
 from django.shortcuts      import render
 from django.views          import View
@@ -11,9 +12,16 @@ from .models               import Product, Category, Image, Option, Question, Re
 class ProductAllView(View):
     def get(self, request):
         try:
-            page         = request.GET.get('page', 1)
+            page         = int(request.GET.get('page', 1))
             page_size    = 9
-            limit        = page_size * int(page)
+            max_page     = math.ceil(Product.objects.all().count()/9)
+
+            if page > max_page:
+                page = 2
+            if page < 1:
+                page = 1
+
+            limit        = page_size * page
             offset       = limit - page_size
             categories   = Category.objects.all()
             ordering     = request.GET.get('ordering')
@@ -34,7 +42,6 @@ class ProductAllView(View):
             
             for product in products:
                 image = product.image_url
-                print(product.review__count)
                 product_dict = {
                     'category'       : product.category.category,
                     'name'           : product.name,
@@ -52,4 +59,3 @@ class ProductAllView(View):
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
         except Category.DoesNotExist:
             return JsonResponse({'message':'CATEGORY_DOES_NOT_EXIST'}, status=404)
-       
