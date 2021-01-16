@@ -24,7 +24,6 @@ class ProductAllView(View):
             categories   = Category.objects.all()
             ordering     = request.GET.get('ordering')
             category     = request.GET.get('category')
-            product_list = []
 
             sort_type = {
                 'min_price' : 'price',
@@ -32,18 +31,14 @@ class ProductAllView(View):
                 'abc'       : 'name',
                 'descabc'   : '-name' 
             }
-            category_type = {
-                'living' : 1,
-                'kitchen': 2
-            }
 
             if category is not None:
                 if ordering is not None:
-                    products = Product.objects.filter(category_type[category]).order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
+                    products = Product.objects.filter(category_id=category).order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
                 else:
-                    products = Product.objects.filter(category_type[category]).order_by('pub_date').prefetch_related('image_url')[offset:limit]
+                    products = Product.objects.filter(category_id=category).order_by('pub_date').prefetch_related('image_url')[offset:limit]
                 if ordering == 'best':
-                    products = Product.objects.filter(category_type[category]).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
+                    products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
 
             if ordering is not None and ordering != 'best':
                 products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
@@ -53,18 +48,15 @@ class ProductAllView(View):
             if ordering == 'best':
                 products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
             
-            for product in products:
-                image = product.image_url
-                product_dict = {
+            product_list = [{
                     'category'       : product.category.category,
                     'name'           : product.name,
                     'price'          : product.price,
                     'description'    : product.description,
-                    'thumnail_image' : image.first().image_url,
-                    'sub_image'      : image.all()[1].image_url,
+                    'thumnail_image' : product.image_url.first().image_url,
+                    'sub_image'      : product.image_url.all()[1].image_url,
                     'pub_date'       : product.pub_date
-                }
-                product_list.append(product_dict)
+                } for product in products ]
 
             return JsonResponse({'product_list':product_list}, status=200)
 
