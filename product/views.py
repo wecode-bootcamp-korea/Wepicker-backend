@@ -12,15 +12,16 @@ class ProductAllView(View):
     def get(self, request):
         try:
             page         = int(request.GET.get('page', 1))
-            max_page     = math.ceil(Product.objects.all().count()/9)
+            PAGE_SIZE    = 9
+            max_page     = math.ceil(Product.objects.all().count()/PAGE_SIZE)
 
             if page > max_page:
                 page = 2
             if page < 1:
                 page = 1
 
-            limit        = 9 * page
-            offset       = limit - 9
+            limit        = PAGE_SIZE * page
+            offset       = limit - PAGE_SIZE
             categories   = Category.objects.all()
             ordering     = request.GET.get('ordering')
             category     = request.GET.get('category')
