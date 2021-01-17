@@ -12,15 +12,16 @@ class ProductAllView(View):
     def get(self, request):
         try:
             page         = int(request.GET.get('page', 1))
-            max_page     = math.ceil(Product.objects.all().count()/9)
+            PAGE_SIZE    = 9
+            max_page     = math.ceil(Product.objects.all().count()/PAGE_SIZE)
 
             if page > max_page:
                 page = 2
             if page < 1:
                 page = 1
 
-            limit        = 9 * page
-            offset       = limit - 9
+            limit        = PAGE_SIZE * page
+            offset       = limit - PAGE_SIZE
             categories   = Category.objects.all()
             ordering     = request.GET.get('ordering')
             category     = request.GET.get('category')
@@ -40,14 +41,15 @@ class ProductAllView(View):
                 if ordering == 'best':
                     products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
 
-            if ordering is not None and ordering != 'best':
-                products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
-            else:
-                products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
+            if category is None:
+                if ordering is not None and ordering != 'best':
+                    products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
+                else:
+                    products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
+                    
+                if ordering == 'best':
+                    products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 
-            if ordering == 'best':
-                products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
-            
             product_list = [{
                     'category'       : product.category.category,
                     'name'           : product.name,
