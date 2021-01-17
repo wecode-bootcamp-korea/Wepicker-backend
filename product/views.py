@@ -40,14 +40,15 @@ class ProductAllView(View):
                 if ordering == 'best':
                     products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
 
-            if ordering is not None and ordering != 'best':
-                products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
-            else:
-                products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
+            if category is None:
+                if ordering is not None and ordering != 'best':
+                    products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
+                else:
+                    products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
+                    
+                if ordering == 'best':
+                    products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 
-            if ordering == 'best':
-                products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
-            
             product_list = [{
                     'category'       : product.category.category,
                     'name'           : product.name,
