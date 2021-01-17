@@ -66,3 +66,26 @@ class ProductAllView(View):
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
         except Category.DoesNotExist:
             return JsonResponse({'message':'CATEGORY_DOES_NOT_EXIST'}, status=404)
+
+
+# 상품 상세 보기
+class ProductView(View):
+    def get(self, request, product_id):
+        try:
+            product = product_id
+
+            if not Option.objects.filter(product=product_id).exists():
+                return JsonResponse({'message':'OPTION_DOES_NOT_EXOST'}, status=200)
+
+            options     = Option.objects.filter(product=product_id)
+            option_list = [{
+                    'name'  : option.name,
+                    'price' : option.price
+                } for option in options]
+            
+            return JsonResponse({'option_list':option_list}, status=200)
+
+        except KeyError:
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
+        except Product.DoesNotExist:
+            return JsonResponse({'message':'PRODUCT_DOES_NOT_EXIST'}, status=404)
