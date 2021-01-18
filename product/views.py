@@ -37,7 +37,7 @@ class ProductAllView(View):
             if category is not None:
                 if ordering == 'best':
                     products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
-                if ordering is not None:
+                elif ordering is not None and ordering != 'best':
                     products = Product.objects.filter(category_id=category).order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
                 else:
                     products = Product.objects.filter(category_id=category).order_by('pub_date').prefetch_related('image_url')[offset:limit]
@@ -45,12 +45,11 @@ class ProductAllView(View):
             if category is None:
                 if ordering == 'best':
                     products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
-                if ordering is not None and ordering != 'best':
+                elif ordering is not None and ordering != 'best':
                     products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
                 else:
                     products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
                     
-                
             product_list = [{
                     'product_id'     : product.id,
                     'category'       : product.category.category,
@@ -74,31 +73,22 @@ class ProductAllView(View):
 class ProductView(View):
     def get(self, request, product_id):
         try:
-            product = product_id
-
-            product = Product.objects.filter(id=product_id).prefetch_related('option', 'image_url')
-            product = product[0]
-
-            image_list = [{
-                'image_url' : product.image_url.all()[i].image_url
-            } for i in range(len(product.image_url.all())
-            )]
-
-            option_list = [{
-                'option_name'  : product.option.all()[i].name,
-                'option_price' : product.option.all()[i].price
-            } for i in range(len(product.option.all())
-            )]
+            product = Product.objects.filter(id=product_id).prefetch_related('option', 'image_url')[0]
 
             product_dict = {
                 'product_id'    : product_id,
                 'product_name'  : product.name,
                 'product_price' : product.price,
                 'description'   : product.description,
-                'image_list'    : image_list,
-                'option_list'   : option_list
-            }
-
+                'image_list'    : [{
+                                    'image_url' : image
+                                } for image in product.image_url.values_list('image_url', flat=True)],
+                'option_list'   :  [{
+                                    'option_name'  : option.name,
+                                    'option_price' : option.price
+                                } for option in product.option.all()]
+                }
+                
             return JsonResponse({'product_dict':product_dict}, status=200)
 
         except KeyError:

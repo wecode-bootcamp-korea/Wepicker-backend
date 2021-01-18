@@ -12,7 +12,7 @@ class User(models.Model):
         db_table = 'users'
 
 class Point(models.Model):
-    user         = models.ForeignKey('User', on_delete=models.CASCADE)
+    user         = models.ForeignKey('User', on_delete=models.CASCADE, related_name='point')
     content      = models.CharField(max_length=80)
     point        = models.IntegerField()
     payment_date = models.DateTimeField(auto_now_add=True)
@@ -21,7 +21,7 @@ class Point(models.Model):
         db_table = 'points'
 
 class Card(models.Model):
-    user          = models.ForeignKey('User', on_delete=models.CASCADE)
+    user          = models.ForeignKey('User', on_delete=models.CASCADE, related_name='card')
     company       = models.CharField(max_length=45)
     number        = models.CharField(max_length=45)
     expired_year  = models.CharField(max_length=45, default='')
@@ -31,7 +31,7 @@ class Card(models.Model):
         db_table = 'cards'
 
 class Address(models.Model):
-    user        = models.ForeignKey('User', on_delete=models.CASCADE) 
+    user        = models.ForeignKey('User', on_delete=models.CASCADE, related_name='address') 
     address     = models.CharField(max_length=400)
     post_number = models.CharField(max_length=45)
     default     = models.BooleanField(default=False)
