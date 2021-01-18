@@ -51,6 +51,7 @@ class ProductAllView(View):
                     products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 
             product_list = [{
+                    'product_id'     : product.id,
                     'category'       : product.category.category,
                     'name'           : product.name,
                     'price'          : product.price,
@@ -77,13 +78,30 @@ class ProductView(View):
             if not Option.objects.filter(product=product_id).exists():
                 return JsonResponse({'message':'OPTION_DOES_NOT_EXOST'}, status=200)
 
-            options     = Option.objects.filter(product=product_id)
+            product = Product.objects.filter(id=product_id).prefetch_related('option', 'image_url')
+            product = product[0]
+
+            image_list = [{
+                'image_url' : product.image_url.all()[i].image_url
+            } for i in range(len(product.image_url.all())
+            )]
+
             option_list = [{
-                    'name'  : option.name,
-                    'price' : option.price
-                } for option in options]
-            
-            return JsonResponse({'option_list':option_list}, status=200)
+                'option_name'  : product.option.all()[i].name,
+                'option_price' : product.option.all()[i].price
+            } for i in range(len(product.option.all())
+            )]
+
+            product_dict = {
+                'product_id'    : product_id,
+                'product_name'  : product.name,
+                'product_price' : product.price,
+                'description'   : product.description,
+                'image_list'    : image_list,
+                'option_list'   : option_list
+            }
+
+            return JsonResponse({'product_dict':product_dict}, status=200)
 
         except KeyError:
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
