@@ -11,12 +11,12 @@ from decorator        import login_check
 
 
 # 장바구니에 담기
-# class OrderItemView(View):
-#     @login_check
-#     def post(self, request):
+class OrderItemView(View):
+    @login_check
+    def post(self, request):
 
 
-# # 결제하기
-# class OrderView(View):
-#     @login_check
-#     def post(self, request)
+# 결제하기
+class OrderView(View):
+    @login_check
+    def post(self, request)

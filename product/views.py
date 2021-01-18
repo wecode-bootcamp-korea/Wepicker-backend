@@ -30,25 +30,26 @@ class ProductAllView(View):
                 'min_price' : 'price',
                 'max_price' : '-price',
                 'abc'       : 'name',
-                'descabc'   : '-name' 
+                'descabc'   : '-name',
+                'recent'    : 'pub_date'
             }
 
             if category is not None:
+                if ordering == 'best':
+                    products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 if ordering is not None:
                     products = Product.objects.filter(category_id=category).order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
                 else:
                     products = Product.objects.filter(category_id=category).order_by('pub_date').prefetch_related('image_url')[offset:limit]
-                if ordering == 'best':
-                    products = Product.objects.filter(category_id=category).annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
 
             if category is None:
+                if ordering == 'best':
+                    products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 if ordering is not None and ordering != 'best':
                     products = Product.objects.order_by(sort_type[ordering]).prefetch_related('image_url')[offset:limit]
                 else:
                     products = Product.objects.order_by('pub_date').prefetch_related('image_url')[offset:limit]
                     
-                if ordering == 'best':
-                    products = Product.objects.annotate(Count('review')).order_by('-review__count').prefetch_related('image_url')[offset:limit]
                 
             product_list = [{
                     'product_id'     : product.id,
@@ -74,9 +75,6 @@ class ProductView(View):
     def get(self, request, product_id):
         try:
             product = product_id
-
-            if not Option.objects.filter(product=product_id).exists():
-                return JsonResponse({'message':'OPTION_DOES_NOT_EXOST'}, status=200)
 
             product = Product.objects.filter(id=product_id).prefetch_related('option', 'image_url')
             product = product[0]
