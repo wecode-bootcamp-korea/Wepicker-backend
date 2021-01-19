@@ -12,8 +12,8 @@ def login_check(func):
             token      = request.headers.get('Authorization') 
             user_token = jwt.decode(token, SECRET_KEY, algorithms='HS256')
             setattr(request, 'user', User.objects.get(id=user_token['id']))
-        # except jwt.exceptions.DecodeError:
-        #     return JsonResponse({'message':'INVALID_TOKEN'}, status=400)
+        except jwt.exceptions.DecodeError:
+            return JsonResponse({'message':'INVALID_TOKEN'}, status=400)
         except User.DoesNotExist:
             return JsonResponse({'message':'INVALID_USER'}, status=400)
             

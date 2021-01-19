@@ -58,7 +58,8 @@ class ProductAllView(View):
                     'description'    : product.description,
                     'thumnail_image' : product.image_url.first().image_url,
                     'sub_image'      : product.image_url.all()[1].image_url,
-                    'pub_date'       : product.pub_date
+                    'pub_date'       : product.pub_date,
+                    'max_page'       : max_page
                 } for product in products ]
 
             return JsonResponse({'product_list':product_list}, status=200)
@@ -82,6 +83,7 @@ class ProductView(View):
                 'description'   : product.description,
                 'image_list'    : list(product.image_url.values_list('image_url', flat=True)),
                 'option_list'   :  [{
+                                    'option_id'    : option.id,
                                     'option_name'  : option.name,
                                     'option_price' : option.price
                                 } for option in product.option.all()]
