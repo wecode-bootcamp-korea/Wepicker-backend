@@ -80,9 +80,7 @@ class ProductView(View):
                 'product_name'  : product.name,
                 'product_price' : product.price,
                 'description'   : product.description,
-                'image_list'    : [{
-                                    'image_url' : image
-                                } for image in product.image_url.values_list('image_url', flat=True)],
+                'image_list'    : list(product.image_url.values_list('image_url', flat=True)),
                 'option_list'   :  [{
                                     'option_name'  : option.name,
                                     'option_price' : option.price
