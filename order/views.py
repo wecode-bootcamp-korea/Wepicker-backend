@@ -17,11 +17,41 @@ class OrderItemView(View):
     @transaction.atomic
     def post(self, request): 
         try:
-            data  = json.loads(request.body)
-            user  = User.objects.filter(id=request.user.id)[0]
+            data = json.loads(request.body)
+            user = User.objects.filter(id=request.user.id)[0]
 
+            if Order.objects.filter(user=user.id).exists() : # order테이블이 없는 경우는 빈 쿼리셋 옴
+                order_item = Order.objects.filter(user=user.id).prefetch_related('orderItem')[0].orderItem.all()
+                order      = Order.objects.filter(user=user, state_id=1)
+
+                for new_order_item in order_item: # 이미 존재하는 상품이 들어올 경우
+                    if new_order_item.product == Product.objects.get(id=data['product']) and new_order_item.delivery_cost.id == Product.objects.get(id=data['delivery_cost']).id and new_order_item.option.id == Product.objects.get(id=data['option']).id:
+                        OrderItem(
+                        id            = OrderItem.objects.get(id=new_order_item.id).id,
+                        product       = Product.objects.get(id=data['product']),
+                        order         = Order.objects.filter(user=user, state_id=1).last(),
+                        quantity      = new_order_item.quantity + data['quantity'],
+                        price         = data['price'],
+                        option        = Option.objects.get(id=data['option']),
+                        delivery_cost = DeliveryCost.objects.get(id=data['delivery_cost'])
+                    ).save()
+                        return JsonResponse({'message':'SUCCESS'}, status=201)
+
+                if order.exists(): # 상품은 다르지만 이미 order 테이블이 있는 user일 경우 (orderItem만 create)
+                    order =  Order.objects.filter(id=order[0].id)[0]
+                    OrderItem(
+                    product       = Product.objects.get(id=data['product']),
+                    order         = order,
+                    quantity      = data['quantity'],
+                    price         = data['price'],
+                    option        = Option.objects.get(id=data['option']),
+                    delivery_cost = DeliveryCost.objects.get(id=data['delivery_cost'])
+                    ).save()
+                    return JsonResponse({'message':'SUCCESS'}, status=201)
+
+            # 처음 장바구니에 담을 경우
             if Address.objects.filter(user=user.id).filter(default=True).exists():
-                address = Address.objects.filter(user=user.id).filter(default=True)
+                address = Address.objects.filter(user=user.id).get(default=True)
             else:
                 address = data.get('address')
 
@@ -38,7 +68,7 @@ class OrderItemView(View):
 
             OrderItem(
                 product       = Product.objects.get(id=data['product']),
-                order         = Order.objects.filter(user=user).last(),
+                order         = Order.objects.filter(user=user, state_id=1).last(),
                 quantity      = data['quantity'],
                 price         = data['price'],
                 option        = Option.objects.get(id=data['option']),
@@ -71,37 +101,6 @@ class OrderItemView(View):
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
 
-class OrderItemUpdateView(View):
-    @login_check
-    def post(self, request):
-        try:
-            user       = request.user
-            order_item = Order.objects.filter(user=user).prefetch_related('orderItem')[0].orderItem.all() 
-
-
-
-            OrderItem(
-                product       = Product.objects.get(id=data['product']),
-                order         = Order.objects.filter(user=user).last(),
-                quantity      = data['quantity'],
-                price         = data['price'],
-                option        = Option.objects.get(id=data['option']),
-                delivery_cost = DeliveryCost.objects.get(id=data['delivery_cost'])
-            ).save()
-
-            return JsonResponse({'message':'SUCCESS'}, status=200)
-        except KeyError:
-            return JsonResponse({'message':'KEY_ERROR'}, status=400)
-
-# class QuantityUpdateView(View):
-#      @login_check
-#      def post(self, request):
-#          try:
-#              # 장바구니에 같은 상품 있으면 수량 += 1, 없으면 Create
-             
-#             return JsonResponse({'message':'SUCCESS'}, status=200)
-#         except KeyError:
-#             return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
   
 
