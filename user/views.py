@@ -49,7 +49,7 @@ class SignUpView(View):
             ).save()
 
             return JsonResponse({'message':'SUCCESS'}, status=201)
-        except KeyError:
+        except ValueError: ######################### keyerror로 변경
             return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
 # 로그인

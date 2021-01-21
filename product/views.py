@@ -77,15 +77,17 @@ class ProductView(View):
             product = Product.objects.filter(id=product_id).prefetch_related('option', 'image_url')[0]
 
             product_dict = {
-                'product_id'    : product_id,
-                'product_name'  : product.name,
-                'product_price' : product.price,
-                'description'   : product.description,
-                'image_list'    : list(product.image_url.values_list('image_url', flat=True)),
-                'option_list'   :  [{
-                                    'option_id'    : option.id,
-                                    'option_name'  : option.name,
-                                    'option_price' : option.price
+                'product_id'       : product_id,
+                'product_name'     : product.name,
+                'product_price'    : product.price,
+                'product_quantity' : product.quantity,
+                'description'      : product.description,
+                'image_list'       : list(product.image_url.values_list('image_url', flat=True)),
+                'option_list'      :  [{
+                                    'option_id'       : option.id,
+                                    'option_name'     : option.name,
+                                    'option_price'    : option.price,
+                                    'option_quantity' : option.quantity
                                 } for option in product.option.all()]
                 }
                 

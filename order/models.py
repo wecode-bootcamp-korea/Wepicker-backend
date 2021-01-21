@@ -6,7 +6,7 @@ class OrderItem(models.Model):
     order         = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='orderItem')
     quantity      = models.PositiveIntegerField(default=0)
     price         = models.DecimalField(max_digits=18, decimal_places=2)
-    option        = models.ForeignKey('product.Option', on_delete=models.SET_NULL, null=True)
+    option        = models.JSONField(null=True)
     delivery_cost = models.ForeignKey('DeliveryCost', on_delete=models.SET_NULL, null=True)
     
     class Meta:
