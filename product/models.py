@@ -10,10 +10,11 @@ class Category(models.Model):
 class Product(models.Model):
     category    = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True)
     name        = models.CharField(max_length=60)
-    price       = models.DecimalField(max_digits=18, decimal_places=2)
+    price       = models.DecimalField(max_digits=18, decimal_places=2, default=0, null=True)
     description = models.CharField(max_length=2000)
     pub_date    = models.DateTimeField(auto_now_add=True)
-
+    quantity    = models.IntegerField(default=1)
+ 
     class Meta:
         db_table = 'products'
 
@@ -24,9 +25,10 @@ class Image(models.Model):
         db_table = 'images'
 
 class Option(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='option')
-    name    = models.CharField(max_length=45)
-    price   = models.DecimalField(max_digits=18, decimal_places=2, null=True)
+    product  = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='option')
+    name     = models.CharField(max_length=45)
+    price    = models.DecimalField(max_digits=18, decimal_places=2, null=True)
+    quantity = models.IntegerField(default=1)
 
     class Meta:
         db_table = 'options'
