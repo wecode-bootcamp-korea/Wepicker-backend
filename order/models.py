@@ -5,7 +5,7 @@ class OrderItem(models.Model):
     product       = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
     order         = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='orderItem')
     quantity      = models.PositiveIntegerField(default=0)
-    price         = models.DecimalField(max_digits=18, decimal_places=2)
+    price         = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     option        = models.JSONField(null=True)
     delivery_cost = models.ForeignKey('DeliveryCost', on_delete=models.SET_NULL, null=True)
     

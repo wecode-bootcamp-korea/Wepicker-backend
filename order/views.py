@@ -4,6 +4,7 @@ import bcrypt
 
 from django.views     import View
 from django.http      import JsonResponse, HttpResponse
+from django.db        import transaction
 
 from .models          import Order, OrderItem, OrderState
 from user.models      import User, Address
@@ -13,12 +14,13 @@ from decorator        import login_check
 
 class OrderItemView(View):
     @login_check
+    @transaction.atomic
     def post(self, request): 
         try:
             data          = json.loads(request.body)
             option_list   = data.get('option_list')
             delivery_cost = data['delivery_cost']
-            
+
             if delivery_cost[0] == 2:
                   delivery_cost = 3
             else:
@@ -26,22 +28,15 @@ class OrderItemView(View):
                     delivery_cost = 1
                 else:
                     delivery_cost = 2
-
             if Order.objects.filter(user=request.user.id, state_id=1, orderItem__delivery_cost_id=delivery_cost).exists():
+                order = Order.objects.get(user=request.user.id, state_id=1)
+                order_item, created = OrderItem.objects.get_or_create(order=order, product_id=data['product'], delivery_cost_id=delivery_cost)
 
-                order_item, created = OrderItem.objects.get_or_create(
-                        order__user_id=request.user.id, 
-                        order__state_id=1, 
-                        product_id=data['product'], 
-                        delivery_cost_id=delivery_cost
-                )
-               
                 if created:   # 기존 ORDER 존재 / 다른 상품 추가
-                    print(order_item.order_id)
                     order_item.order_id   = order_item.order_id
                     order_item.product_id = data["product"]
                     order_item.option     = option_list
-                    order_item.quantity   = data["qantity"]
+                    order_item.quantity   = data["quantity"]
                     order_item.price      = data["price"]
                     delivery_cost_id      = delivery_cost
                     order_item.save()
@@ -51,12 +46,12 @@ class OrderItemView(View):
                     for option in order_item.option: # 옵션까지 일치할 경우 수량, 가격 더해주기
                         if input_option['option_id'] == option["option_id"]:
                             order_item.quantity                     = order_item.quantity + data['quantity']
-                            order_item.price                        = order_item.price + int(data['price'])
+                            order_item.price                        = int(float(order_item.price)) + int(float(data['price']))
                             order_item.option[0]['option_quantity'] = order_item.option[0]['option_quantity'] + input_option['option_quantity']
                             order_item.save()
                         else: # 새로운 옵션 추가
                             order_item.quantity = order_item.quantity + data['quantity']
-                            order_item.price    = order_item.price + int(data['price'])
+                            order_item.price    = int(float(order_item.price)) + int(float(data['price']))
                             order_item.option.append(input_option)
                             order_item.save()
                             return JsonResponse({'message':'SUCCESS'}, status=201)
@@ -88,8 +83,8 @@ class OrderItemView(View):
                 delivery_cost_id = delivery_cost
             ).save()
             return JsonResponse({'message':'SUCCESS'}, status=201)
-        except ValueError:
-            return JsonResponse({'message':'VALUE_ERROR'}, status=400)
+        except KeyError:
+            return JsonResponse({'message':'KEY_ERROR'}, status=400)
 
     @login_check
     def get(self, request):
